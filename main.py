@@ -1,15 +1,7 @@
-from flask import Flask
+from flask import Flask, render_template, request
+import os
 
-app = Flask(__name__)
-
-@app.route('/')
-def read_file():
-    try:
-        with open('data.txt', 'r') as file:
-            data = file.read()
-            return data
-    except FileNotFoundError:
-        return 'Ошибка чтения файла'
+app = Flask(name)
 
 def read_temp_from_file(filename):
     try:
@@ -26,18 +18,18 @@ def save_temp_to_file(temp, output_filename):
     with open(output_filename, 'w') as file:
         file.write(temp)
 
-# Чтение переменной temp из файла data.txt
-temp_value = read_temp_from_file('data.txt')
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-# Сохранение переменной temp в другом файле
-if temp_value:
-    save_temp_to_file(temp_value, 'temp_output.txt')
-    print(f'Переменная temp сохранена в файле temp_output.txt: {temp_value}')
-else:
-    print('Переменная temp не найдена в файле data.txt')
+@app.route('/process_data', methods=['POST'])
+def process_data():
+    temp_value = read_temp_from_file('data.txt')
+    if temp_value:
+        save_temp_to_file(temp_value, 'temp_output.txt')
+        return render_template('result.html', temp=temp_value)
+    else:
+        return 'Переменная temp не найдена в файле data.txt'
 
-
-
-
-if __name__ == '__main__':
+if name == 'main':
     app.run()
