@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 
-app = Flask(name)
+app = Flask(__name__)
 
 def read_temp_from_file(filename):
     try:
@@ -22,14 +22,16 @@ def save_temp_to_file(temp, output_filename):
 def index():
     return render_template('index.html')
 
-@app.route('/process_data', methods=['POST'])
-def process_data():
+@app.route('/get_temp')
+def get_temp():
     temp_value = read_temp_from_file('data.txt')
-    if temp_value:
-        save_temp_to_file(temp_value, 'temp_output.txt')
-        return render_template('result.html', temp=temp_value)
+    if int(temp_value)>25:
+        save_temp_to_file("Кондиционер включён",'temp_output.txt')
     else:
-        return 'Переменная temp не найдена в файле data.txt'
+        save_temp_to_file("Кондиционер выключен",'temp_output.txt')
+    
+    return jsonify(temp_value)
 
-if name == 'main':
+
+if __name__ == '__main__':
     app.run()

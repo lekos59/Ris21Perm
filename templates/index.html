@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Кнопка для обработки данных</title>
+    <title>Главная страница</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            function updateTemp(){
+                $.ajax({
+                    url: '/get_temp',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#temp_value').text('Значение переменной temp: ' + data);
+                    }
+                });
+            }
+            setInterval(updateTemp, 10000); // Выполнять функцию обновления каждые 10 секунд
+            updateTemp(); // Вызывать функцию обновления сразу при загрузке страницы
+        });
+    </script>
 </head>
 <body>
-    <form action="/process_data" method="post">
-        <input type="submit" value="Обработать данные">
-    </form>
+    <h1 id="temp_value">Значение переменной temp: </h1>
 </body>
 </html>
