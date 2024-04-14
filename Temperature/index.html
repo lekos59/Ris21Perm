@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AJAX Example</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div id="data"></div>
+    <script>
+        function loadData() {
+            $.ajax({
+                url: "getData.php",
+                type: "GET",
+                success: function(response) {
+                    $('#data').html(response);
+                }
+            });
+        }
+
+        // Запрашиваем данные каждые 5 секунд
+        loadData();
+        setInterval(loadData, 1000);
+    </script>
+</body>
+</html>
