@@ -15,12 +15,23 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 // Запрос данных из таблицы
-$sql = "SELECT Id, Temp FROM `Temperature` ORDER BY Id DESC LIMIT 1"; 
+$sql = "SELECT Id, Temp, Stat FROM `Temperature` ORDER BY Id DESC LIMIT 1"; 
 
  $result = $conn->query($sql); 
 
 // Вывод данных
-foreach($result as $row) {
-    echo $row['Temp']. '<br>';
+echo '<div style="text-align:center; color:red; font-size:55px;">';
+foreach ($result as $row) {
+    echo '<b>'. $row['Temp']. '</b><br>'. '<br>';
 }
+    if ($row['Stat'] == 1) {
+        echo "<b>Вкл</b>";
+         
+    } else {
+        echo '<b>Выкл</b>';
+        
+    }
+
+echo '</div>';
+
 ?>
