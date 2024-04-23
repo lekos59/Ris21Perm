@@ -25,3 +25,6 @@
 ![image](https://github.com/lekos59/Ris21Perm/assets/60417866/7cf39079-09c8-490a-be5c-08fb87ffcaa0)
 ![image](https://github.com/lekos59/Ris21Perm/assets/60417866/194fdc43-5b23-441b-bb45-614f860b3521)
 
+![image](https://github.com/lekos59/Ris21Perm/assets/60417866/d19c19ff-b504-43df-827d-686bbfdae506)
+
+
