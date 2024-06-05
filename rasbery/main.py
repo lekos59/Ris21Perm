@@ -1,74 +1,78 @@
 import sys
-import requests
 import time
 import datetime
+
+import requests
 from bs4 import BeautifulSoup
 
-patchtemp = '/home/user/Desktop/temp.txt'
-patchstat = '/home/user/Desktop/stat.txt'
-url_check = 'https://lekweb.store/chek.php'
+PATCH_TEMP = 'temp.txt'
+PATCH_STAT = 'stat.txt'
+URL_CHECK = 'https://lekweb.store/chek.php'
+URL_ZAPIS = 'https://lekweb.store/Zapis.php'
 
 
-def read_file(patchtemp):
-    with open(patchtemp, 'r') as file:
-        value = file.read().strip()
-    return value
-
-
-def stat_file(patchstat):
-    with open(patchstat, 'r') as file:
-        stat = file.read().strip()
-    return stat
-
-
-def save_temp_to_file(stat, patchstat):
-    with open(patchstat, 'w') as file:
-        file.write(str(stat))
-
-
-# stat 0-off 1-on 2-autoOn 3-autoOff
 def check_stat():
-    response = requests.get(url_check)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        otvet = soup.find('p', id='otvev')
-        if otvet:
-            otvet_text = otvet.text
-            return otvet_text
-        else:
-            print("Тег <p id='otvet'> не найден", file=sys.stderr)
-            return 0
+    try:
+        response = requests.get(URL_CHECK)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Ошибка при выполнении запроса: {e}", file=sys.stderr)
+        return 0
+    
+    soup = BeautifulSoup(response.text, 'html.parser')
+    response_tag = soup.find('p', id='otvev')
+    if response_tag:
+        result = response_tag.text.strip()
     else:
-        print("Ошибка при выполнении запроса", file=sys.stderr)
+        print("Тег <p id='otvev'> не найден", file=sys.stderr)
+        result = 0
+    return result
 
 
 while True:
+    try:
+        with open(PATCH_TEMP, 'r') as file:
+            value = int(file.read().strip())
+    except (ValueError, FileNotFoundError) as e:
+        print(f"Ошибка при чтении файла {PATCH_TEMP}: {e}", file=sys.stderr)
+        time.sleep(30)
+        continue
 
-    value = read_file(patchtemp)
-    time.sleep(1)
-    flag = check_stat()
-    if flag == '2':
-        if int(value) > 25:
+    stat = check_stat()
+    if stat == '2':
+        if value > 25:
             print('avtoOn')
-            save_temp_to_file(2, patchstat)
-            time.sleep(1)
+            with open(PATCH_STAT, 'w') as file:
+                file.write('2')
         else:
-            save_temp_to_file(3, patchstat)
             print('avtoOff')
-            time.sleep(1)
-    elif flag == '1':
+            with open(PATCH_STAT, 'w') as file:
+                file.write('3')
+    elif stat == '1':
         print('on')
-        save_temp_to_file(1, patchstat)
-        time.sleep(1)
+        with open(PATCH_STAT, 'w') as file:
+            file.write('1')
     else:
         print('off')
-        save_temp_to_file(0, patchstat)
-        time.sleep(1)
-    stat = stat_file(patchstat)
-    url = 'https://lekweb.store/Zapis.php?Temp=' + \
-          str(value) + '&Stat=' + str(stat)
-    response = requests.get(url)
-    print('Time otpr:' + str(datetime.datetime.now()))
+        with open(PATCH_STAT, 'w') as file:
+            file.write('0')
+
+    try:
+        with open(PATCH_STAT, 'r') as file:
+            stat = file.read().strip()
+    except FileNotFoundError as e:
+        print(f"Ошибка при чтении файла {PATCH_STAT}: {e}", file=sys.stderr)
+        time.sleep(30)
+        continue
+
+    url = f'{URL_ZAPIS}?Temp={value}&Stat={stat}'
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Ошибка при отправке данных: {e}", file=sys.stderr)
+
+    print(f'Time otpr: {datetime.datetime.now()}')
     print(url)
 
     time.sleep(30)
